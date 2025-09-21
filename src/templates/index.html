@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon"
-      href="{{ url_for('static', filename='images/favicon.ico') }}">
-    <title>Pokemon Fighter</title>
-  </head>
+{% block title %}Pokemon Fighter{% endblock %}
 
-  <body>
-    <h1>
-      <pre>
+{% block content %}
+<h1>
+  <pre>
                                   ,'\
     _.----.        ____         ,'  _\   ___    ___     ____
 _,-'       `.     |    |  /`.   \,-'    |   \  /   |   |    \  |`.
@@ -24,13 +17,11 @@ _,-'       `.     |    |  /`.   \,-'    |   \  /   |   |    \  |`.
        \    \ `.__,'|  |`-._    `|      |__| \/ |  `.__,'|  | |   |
         \_.-'       |__|    `-._ |              '-.|     '-.| |   |
                                 `'                            '-._|
-        </pre>
-    </h1>
+    </pre>
+</h1>
 
-    <form action="/" method="post" enctype="multipart/form-data">
-      <input type="file" name="file" accept=".py">
-      <input type="submit" value="Submit">
-    </form>
-  </body>
-
-</html>
+<form action="/" method="post" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".py">
+  <input type="submit" value="Submit">
+</form>
+{% endblock %}

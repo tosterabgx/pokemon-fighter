@@ -1,41 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon"
-      href="{{ url_for('static', filename='images/favicon.ico') }}">
-    <link rel="stylesheet" type="text/css"
-      href="{{ url_for('static', filename='styles/table.css') }}">
-    <title>Table</title>
-  </head>
+{% block styles %}
+<link rel="stylesheet" type="text/css"
+  href="{{ url_for('static', filename='styles/table.css') }}">
+{% endblock %}
 
-  <body>
-    <table>
-      <thead>
-        <tr>
-          <th scope="col">Username</th>
-          {% for i in range(users|length) %}
-          <th scope="col">{{ i + 1 }}</th>
-          {% endfor %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for username, checks in users.items() %}
-        <tr>
-          <th scope="row">{{ username }}</th>
-          {% for check in checks %}
-          {% if check == True %}
-          <td>+</td>
-          {% else %}
-          <td></td>
-          {% endif %}
-          {% endfor %}
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </body>
+{% block title %}Login{% endblock %}
 
-</html>
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th scope="col">Username</th>
+      {% for i in range(users|length) %}
+      <th scope="col">{{ i + 1 }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for username, checks in users.items() %}
+    <tr>
+      <th scope="row">{{ username }}</th>
+      {% for check in checks %}
+      {% if check == True %}
+      <td>+</td>
+      {% else %}
+      <td></td>
+      {% endif %}
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
