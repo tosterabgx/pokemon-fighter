@@ -2,19 +2,13 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request
-from werkzeug.utils import secure_filename
 
-from config import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
+from lib.utils import allowed_file, get_upload_path
 
 load_dotenv()
 
 app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.secret_key = os.getenv("secret_key")
-
-
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -31,8 +25,7 @@ def index():
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
-            filename = secure_filename("name.py")
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            file.save(get_upload_path(file.filename))
             return redirect(request.url)
 
     return render_template("index.html")
