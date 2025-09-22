@@ -7,8 +7,10 @@
   <input type="file" name="file" accept=".py" required>
   <button type="submit">Upload</button>
 </form>
+
 {% for message in get_flashed_messages() %}
 <div style="color: red;">{{ message }}</div>
 {% endfor %}
-<p><a href="{{ url_for('logout') }}">Logout</a></p>
+
+<a href="{{ url_for('logout') }}">Logout</a>
 {% endblock %}

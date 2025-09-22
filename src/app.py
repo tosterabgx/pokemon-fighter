@@ -2,9 +2,8 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, session, url_for
-from werkzeug.security import check_password_hash
 
-from lib.db import create_user, get_password
+from lib.db import check_password, create_user
 from lib.utils import allowed_file, get_upload_path, login_required
 
 load_dotenv()
@@ -23,20 +22,37 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        if check_password_hash(get_password(username), password):
+
+        if check_password(username, password):
             session["user"] = username
             return redirect(url_for("upload"))
 
-        flash("Invalid credentials.")
+        flash("Invalid credentials")
         return redirect(request.url)
 
     return render_template("login.html")
 
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        if create_user(username, password):
+            session["user"] = username
+            return redirect(url_for("upload"))
+
+        flash("User already exists")
+        return redirect(request.url)
+
+    return render_template("register.html")
+
+
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("/"))
+    return redirect("/")
 
 
 @app.route("/upload", methods=["GET", "POST"])
@@ -61,6 +77,6 @@ def upload():
     return render_template("upload.html")
 
 
-@app.route("/table/")
+@app.route("/table")
 def table():
     return render_template("table.html", users={})
