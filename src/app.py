@@ -1,9 +1,11 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, flash, redirect, render_template, request
+from flask import Flask, flash, redirect, render_template, request, session, url_for
+from werkzeug.security import check_password_hash
 
-from lib.utils import allowed_file, get_upload_path
+from lib.db import create_user, get_password
+from lib.utils import allowed_file, get_upload_path, login_required
 
 load_dotenv()
 
@@ -11,8 +13,35 @@ app = Flask(__name__)
 app.secret_key = os.getenv("secret_key")
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def index():
+    return render_template("index.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        if check_password_hash(get_password(username), password):
+            session["user"] = username
+            return redirect(url_for("upload"))
+
+        flash("Invalid credentials.")
+        return redirect(request.url)
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("/"))
+
+
+@app.route("/upload", methods=["GET", "POST"])
+@login_required
+def upload():
     if request.method == "POST":
         if "file" not in request.files:
             flash("No file selected")
@@ -26,9 +55,10 @@ def index():
 
         if file and allowed_file(file.filename):
             file.save(get_upload_path(file.filename))
-            return redirect(request.url)
 
-    return render_template("index.html")
+        return redirect(request.url)
+
+    return render_template("upload.html")
 
 
 @app.route("/table/")
