@@ -1,3 +1,3 @@
 UPLOAD_FOLDER = "uploads"
-DATABASE_FILE = "users.json"
+DATABASE_FILE = "db.json"
 ALLOWED_EXTENSIONS = {"txt", "py"}

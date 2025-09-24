@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<form method="post" action="/api/upload" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".py" required>
+  <button type="submit">Upload</button>
+</form>
+
+{% for message in get_flashed_messages() %}
+<p style="color: red;">{{ message }}</p>
+{% endfor %}
+
+{% if is_admin %}
+<form method="post" action="/api/compete_all">
+  <button type="submit">Compete all trainers!</button>
+</form>
+{% endif %}
+
+<a href="{{ url_for('api.logout') }}">Logout</a>
+{% endblock %}

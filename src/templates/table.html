@@ -5,25 +5,27 @@
   href="{{ url_for('static', filename='styles/table.css') }}">
 {% endblock %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Table{% endblock %}
 
 {% block content %}
 <table>
   <thead>
     <tr>
       <th scope="col">Username</th>
-      {% for i in range(users|length) %}
-      <th scope="col">{{ i + 1 }}</th>
+      {% for username, data in users %}
+      <th scope="col">{{ username }}</th>
       {% endfor %}
     </tr>
   </thead>
   <tbody>
-    {% for username, checks in users.items() %}
+    {% for username, data in users %}
     <tr>
       <th scope="row">{{ username }}</th>
-      {% for check in checks %}
-      {% if check == True %}
+      {% for i in range(users|length) %}
+      {% if i in data['won'] %}
       <td>+</td>
+      {% elif i in data['lost'] %}
+      <td>-</td>
       {% else %}
       <td></td>
       {% endif %}

@@ -90,3 +90,10 @@ class Competition:
             return 0
         else:
             return 1
+
+
+def compete_all(*args):
+    if len(args) < 2:
+        return False
+
+    return True

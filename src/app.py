@@ -1,82 +1,41 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, render_template, session
 
-from lib.db import check_password, create_user
-from lib.utils import allowed_file, get_upload_path, login_required
+from api import api_blueprint
+from lib.db import get_admin_status, get_all_active_users
+from lib.utils import login_required
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("secret_key")
 
+app.register_blueprint(api_blueprint)
 
-@app.route("/")
+
+@app.get("/")
 def index():
     return render_template("index.html")
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.get("/login/")
 def login():
-    if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
-
-        if check_password(username, password):
-            session["user"] = username
-            return redirect(url_for("upload"))
-
-        flash("Invalid credentials")
-        return redirect(request.url)
-
     return render_template("login.html")
 
 
-@app.route("/register", methods=["GET", "POST"])
+@app.get("/register/")
 def register():
-    if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
-
-        if create_user(username, password):
-            session["user"] = username
-            return redirect(url_for("upload"))
-
-        flash("User already exists")
-        return redirect(request.url)
-
     return render_template("register.html")
 
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/")
-
-
-@app.route("/upload", methods=["GET", "POST"])
+@app.get("/profile/")
 @login_required
-def upload():
-    if request.method == "POST":
-        if "file" not in request.files:
-            flash("No file selected")
-            return redirect(request.url)
-
-        file = request.files["file"]
-
-        if file.filename == "":
-            flash("No file selected")
-            return redirect(request.url)
-
-        if file and allowed_file(file.filename):
-            file.save(get_upload_path(f"{session["user"]}.py"))
-
-        return redirect(request.url)
-
-    return render_template("upload.html")
+def profile():
+    return render_template("profile.html", is_admin=get_admin_status(session["user"]))
 
 
-@app.route("/table")
+@app.route("/table/")
 def table():
-    return render_template("table.html", users={})
+    return render_template("table.html", users=get_all_active_users().items())

@@ -208,4 +208,4 @@ __marimo__/
 # Custom
 scrap/
 uploads/*
-users.json
+db.json

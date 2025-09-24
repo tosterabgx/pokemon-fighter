@@ -1,10 +1,11 @@
 import os
 from functools import wraps
 
-from flask import redirect, request, session, url_for
+from flask import redirect, session, url_for
 from werkzeug.utils import secure_filename
 
 from lib.config import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
+from lib.db import get_admin_status
 
 
 def allowed_file(filename):
@@ -21,6 +22,17 @@ def login_required(f):
     def wrapper(*args, **kwargs):
         if not session.get("user"):
             return redirect(url_for("login"))
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not get_admin_status(session.get("user", "")):
+            return redirect(url_for("profile"))
+
         return f(*args, **kwargs)
 
     return wrapper

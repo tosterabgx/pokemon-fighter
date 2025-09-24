@@ -3,7 +3,7 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<form method="post">
+<form method="post" action="/api/register">
   <label for="username">Username</label>
   <input name="username" id="username" required>
   <label for="password">Password</label>
@@ -12,6 +12,6 @@
 </form>
 
 {% for message in get_flashed_messages() %}
-<div style="color: red;">{{ message }}</div>
+<p style="color: red;">{{ message }}</p>
 {% endfor %}
 {% endblock %}
