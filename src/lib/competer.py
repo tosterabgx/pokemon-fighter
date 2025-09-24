@@ -49,8 +49,8 @@ class Competition:
         count: int = 50,
         atk_max: int = 20,
         df_max: int = 20,
-        hp_max: int = 75,
-        hp_min: int = 10,
+        hp_max: int = 100,
+        hp_min: int = 90,
     ) -> None:
         for i in range(count):
             pokemon = self._random_pokemon(i, atk_max, df_max, hp_max, hp_min)

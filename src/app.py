@@ -70,7 +70,7 @@ def upload():
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
-            file.save(get_upload_path(file.filename))
+            file.save(get_upload_path(f"{session["user"]}.py"))
 
         return redirect(request.url)
 
