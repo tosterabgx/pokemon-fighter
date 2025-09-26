@@ -10,7 +10,6 @@ from lib.config import DATABASE_FILE, UPLOAD_FOLDER
 def _get_db():
     db = getattr(g, "_database", None)
     if db is None:
-        print("rofls")
         db = g._database = sqlite3.connect(DATABASE_FILE)
     return db
 
@@ -47,30 +46,6 @@ def check_password(username: str, password: str):
         return -1
 
     return data[0][0]
-
-
-def get_id_by_username(username: str):
-    cur = _get_db().cursor()
-    cur.execute("SELECT id FROM users WHERE username = ?", (username,))
-    id_data = cur.fetchall()
-    cur.close()
-
-    if len(id_data) == 0:
-        return False
-
-    return id_data[0][0]
-
-
-def get_username_by_id(id: str):
-    cur = _get_db().cursor()
-    cur.execute("SELECT username FROM users WHERE id = ?", (id,))
-    username_data = cur.fetchall()
-    cur.close()
-
-    if len(username_data) == 0:
-        return False
-
-    return username_data[0][0]
 
 
 def get_all_active_users():

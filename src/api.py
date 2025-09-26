@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, redirect, request, session, url_for
 
 from lib.db import check_password, create_user
-from lib.utils import admin_required, allowed_file, get_upload_path, login_required
+from lib.utils import admin_required, get_trainer_class, get_upload_path, login_required
 
 api_blueprint = Blueprint("api", __name__)
 
@@ -56,11 +56,12 @@ def upload():
         flash("No file selected")
         return redirect(url_for("profile"))
 
-    if not allowed_file(file.filename):
-        flash("Not allowed file format")
+    if get_trainer_class(file.read()) is None:
+        flash("Incorrect file content")
         return redirect(url_for("profile"))
 
     file.save(get_upload_path(f"{session["user_id"]}.py"))
+
     return redirect(url_for("profile"))
 
 
