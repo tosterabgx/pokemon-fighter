@@ -16,7 +16,7 @@ def get_trainer(id):
 
     exec(code, locals=sandbox)
 
-    return sandbox["SmartTrainer"]
+    return sandbox["SmartTrainer"]()
 
 
 def validate_trainer(code) -> str | Trainer:
@@ -80,5 +80,4 @@ def admin_required(f):
 
         return f(*args, **kwargs)
 
-    return wrapper
     return wrapper

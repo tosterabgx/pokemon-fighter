@@ -1,4 +1,5 @@
 import random
+from json import dump
 
 from lib.base import (
     ElectricPokemon,
@@ -8,6 +9,7 @@ from lib.base import (
     Trainer,
     WaterPokemon,
 )
+from lib.utils import get_trainer
 
 POKEMON_TYPES = [ElectricPokemon, FirePokemon, GrassPokemon, WaterPokemon]
 
@@ -23,7 +25,7 @@ class Battle:
         return pokemon_type(name=f"Pokemon {idx}", atk=atk, df=df)
 
     @staticmethod
-    def duel(pokemon1: Pokemon, pokemon2: Pokemon) -> int:
+    def duel(pokemon1: Pokemon, pokemon2: Pokemon, turn: int):
         turn = 0
 
         while pokemon1.hp > 0 and pokemon2.hp > 0:
@@ -35,39 +37,39 @@ class Battle:
                 turn = 0
 
         if pokemon1.hp > 0:
-            return 0
+            return 0, turn
         else:
-            return 1
+            return 1, turn
 
-    def __init__(self, trainer1: Trainer, trainer2: Trainer):
-        self.trainer1 = trainer1
-        self.trainer2 = trainer2
+    def __init__(self):
+        self.box = list()
 
-    def fill_boxes(self, count: int = 50, atk_max: int = 5, df_max: int = 5) -> None:
+    def fill_box(self, count: int = 50, atk_max: int = 5, df_max: int = 5) -> None:
         for i in range(count):
             pokemon = Battle.get_random_pokemon(i, atk_max=atk_max, df_max=df_max)
-            self.trainer1.add(pokemon)
-            self.trainer2.add(pokemon)
+            self.box.append(pokemon)
 
-    def start(self, pokemon_per_team: int = 5) -> int:
-        if (
-            len(self.trainer1.box) < pokemon_per_team
-            or len(self.trainer2.box) < pokemon_per_team
-        ):
-            raise IndexError("Boxes are not filled enough. Have you used fill_boxes?")
+    def start(self, trainer1, trainer2, pokemon_per_team: int = 5) -> int:
+        if len(self.box) < pokemon_per_team:
+            raise IndexError("Boxes are not filled enough. Have you used fill_box?")
 
-        team1 = self.trainer1.best_team(pokemon_per_team)
-        team2 = self.trainer2.best_team(pokemon_per_team)
+        trainer1.box = self.box
+        trainer2.box = self.box
+
+        team1 = trainer1.best_team(pokemon_per_team)
+        team2 = trainer2.best_team(pokemon_per_team)
 
         i, j = 0, 0
+
+        turn = 0
 
         pokemon1 = team1[i]
         pokemon2 = team2[j]
 
         while i < len(team1) and j < len(team2):
-            result = Battle.duel(pokemon1, pokemon2)
+            result, turn = Battle.duel(pokemon1, pokemon2, turn)
 
-            if result == 0:
+            if result == -1:
                 j += 1
                 if j >= len(team2):
                     break
@@ -79,10 +81,43 @@ class Battle:
                 pokemon1 = team1[i]
 
         if j >= len(team2):
-            return 0
+            return -1
         else:
             return 1
 
 
-def do_battle_all(trainers):
-    return (dict(), dict())
+def do_battle_all(users):
+    n = len(users)
+    usernames = [u for _, u in users]
+
+    trainers = [get_trainer(id) for id, _ in users]
+
+    results = {u: {"won": [], "lost": []} for u in usernames}
+    for i in range(n):
+        ui, ti = usernames[i], trainers[i]
+        for j in range(i + 1, n):
+            uj, tj = usernames[j], trainers[j]
+            print(ui, uj)
+
+            r = 0
+
+            for _ in range(5):
+                battle = Battle()
+                battle.fill_box()
+
+                r = battle.start(ti, tj) - battle.start(tj, ti)
+
+                if r != 0:
+                    break
+
+            if r <= 0:
+                results[ui]["won"].append(j)
+                results[uj]["lost"].append(i)
+            else:
+                results[uj]["won"].append(i)
+                results[ui]["lost"].append(j)
+
+    with open("results.json", mode="w") as f:
+        dump(results, fp=f, indent=2)
+
+    return usernames, results

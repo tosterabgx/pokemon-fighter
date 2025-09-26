@@ -50,7 +50,7 @@ def check_password(username: str, password: str):
 
 def get_all_active_users():
     cur = _get_db().cursor()
-    cur.execute("SELECT id, username FROM users")
+    cur.execute("SELECT id, username FROM users ORDER BY id ASC")
     users = cur.fetchall()
     cur.close()
 

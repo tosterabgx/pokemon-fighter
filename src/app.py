@@ -1,4 +1,5 @@
 import os
+from json import load
 
 from dotenv import load_dotenv
 from flask import Flask, g, render_template, session
@@ -42,7 +43,10 @@ def profile():
 
 @app.route("/table/")
 def table():
-    return render_template("table.html", users=get_all_active_users())
+    with open("results.json") as f:
+        results = load(f)
+
+    return render_template("table.html", users=results.keys(), results=results)
 
 
 @app.teardown_appcontext
