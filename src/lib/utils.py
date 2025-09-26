@@ -14,7 +14,7 @@ def get_trainer(id):
     with open(get_upload_path(f"{id}.py")) as f:
         code = f.read()
 
-    exec(code, locals=sandbox)
+    exec(code, globals(), sandbox)
 
     return sandbox["SmartTrainer"]()
 

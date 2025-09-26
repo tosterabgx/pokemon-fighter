@@ -1,33 +1,35 @@
 {% extends "base.html" %}
 
 {% block styles %}
-<link rel="stylesheet" type="text/css"
-  href="{{ url_for('static', filename='styles/table.css') }}">
+
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 {% endblock %}
 
 {% block title %}Table{% endblock %}
 
 {% block content %}
-<table>
-  <thead>
+<table class="w-1/2 mx-1/2">
+  <thead class>
     <tr>
-      <th scope="col">Username</th>
+      <th scope="col" class="px-6 py-3 bg-gray-400">Username</th>
       {% for username in users %}
-      <th scope="col">{{ username }}</th>
+      <th scope="col" class="px-6 py-3 border-l border-gray-700 bg-gray-400">
+        {{ username }}
+      </th>
       {% endfor %}
     </tr>
   </thead>
   <tbody>
     {% for username in users %}
-    <tr>
-      <th scope="row">{{ username }}</th>
+    <tr class="border-t border-gray-700">
+      <th scope="row" class="px-6 py-3 bg-gray-400">{{ username }}</th>
       {% for i in range(users|length) %}
       {% if i in results[username]["won"] %}
-      <td>+</td>
+      <td class="px-6 py-3 border-l border-gray-700 bg-green-300"></td>
       {% elif i in results[username]["lost"] %}
-      <td>-</td>
+      <td class="px-6 py-3 border-l border-gray-700 bg-red-300"></td>
       {% else %}
-      <td></td>
+      <td class="px-6 py-3 border-l border-gray-700 bg-gray-300"></td>
       {% endif %}
       {% endfor %}
     </tr>

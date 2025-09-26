@@ -12,6 +12,8 @@ from lib.base import (
 from lib.utils import get_trainer
 
 POKEMON_TYPES = [ElectricPokemon, FirePokemon, GrassPokemon, WaterPokemon]
+WIN_FIRST = -1
+WIN_SECOND = 1
 
 
 class Battle:
@@ -37,9 +39,9 @@ class Battle:
                 turn = 0
 
         if pokemon1.hp > 0:
-            return 0, turn
+            return WIN_FIRST, turn
         else:
-            return 1, turn
+            return WIN_SECOND, turn
 
     def __init__(self):
         self.box = list()
@@ -69,7 +71,7 @@ class Battle:
         while i < len(team1) and j < len(team2):
             result, turn = Battle.duel(pokemon1, pokemon2, turn)
 
-            if result == -1:
+            if result == WIN_FIRST:
                 j += 1
                 if j >= len(team2):
                     break
@@ -97,23 +99,19 @@ def do_battle_all(users):
         ui, ti = usernames[i], trainers[i]
         for j in range(i + 1, n):
             uj, tj = usernames[j], trainers[j]
-            print(ui, uj)
 
             r = 0
 
-            for _ in range(5):
+            for _ in range(100):
                 battle = Battle()
                 battle.fill_box()
 
-                r = battle.start(ti, tj) - battle.start(tj, ti)
+                r += battle.start(ti, tj) - battle.start(tj, ti)
 
-                if r != 0:
-                    break
-
-            if r <= 0:
+            if r < 0:
                 results[ui]["won"].append(j)
                 results[uj]["lost"].append(i)
-            else:
+            elif r > 0:
                 results[uj]["won"].append(i)
                 results[ui]["lost"].append(j)
 

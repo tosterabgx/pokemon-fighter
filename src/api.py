@@ -30,7 +30,6 @@ def register():
     user_id = create_user(username, password)
 
     if user_id == -1:
-        print(username, password)
         flash("User already exists")
         return redirect(url_for("register"))
 
@@ -64,7 +63,7 @@ def upload():
         return redirect(url_for("profile"))
 
     file.seek(0)
-    file.save(get_upload_path(f"{session["user_id"]}.py"))
+    file.save(get_upload_path(f"{session['user_id']}.py"))
 
     return redirect(url_for("profile"))
 
