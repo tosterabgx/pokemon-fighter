@@ -18,5 +18,7 @@
 </form>
 {% endif %}
 
-<a href="{{ url_for('api.logout') }}">Logout</a>
+<a href="{{ url_for('index') }}">Main page</a><br>
+<a href="{{ url_for('index') }}">Table</a><br>
+<a href="{{ url_for('api.logout') }}">Logout</a><br>
 {% endblock %}

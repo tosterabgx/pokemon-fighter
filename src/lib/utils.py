@@ -5,55 +5,46 @@ from flask import redirect, session, url_for
 from werkzeug.utils import secure_filename
 
 from lib.base import Pokemon, Trainer
-from lib.config import UPLOAD_FOLDER
+from lib.config import EXEC_BLACKLIST, UPLOAD_FOLDER
 from lib.db import get_admin_status
 
 
-def get_trainer_class(code: str):
-    sandbox = {"Trainer": Trainer}
+def validate_trainer(code) -> str | Trainer:
+    try:
+        code_string = str(code)
+    except:
+        return "File has unreadable bytes"
 
     safe_builtins = dict(__builtins__)
 
-    blacklist = {
-        "open",
-        "input",
-        "exec",
-        "eval",
-        "compile",
-        "help",
-        "dir",
-        "globals",
-        "locals",
-        "vars",
-        "quit",
-        "exit",
-        "__import__",
-    }
+    for word in EXEC_BLACKLIST:
+        safe_builtins.pop(word, None)
 
-    for name in blacklist:
-        safe_builtins.pop(name, None)
+        if f"{word} " in code_string or f"{word}(" in code_string.replace(" ", ""):
+            return f"Forbidden command"
+
+    sandbox = {"Trainer": Trainer, "Pokemon": Pokemon}
 
     try:
         exec(code, {"__builtins__": safe_builtins}, sandbox)
     except Exception as e:
-        raise e
-        return None
+        return "Failed to run code"
 
     if "SmartTrainer" not in sandbox:
-        return None
-
-    trainer_class = sandbox["SmartTrainer"]
+        return "Class SmartTrainer is not found"
 
     try:
-        trainer = trainer_class()
-
-        trainer.add(Pokemon("test"))
-
-        trainer.best_team(1)[0]
+        exec(
+            "t = SmartTrainer()\nt.add(Pokemon('test1'))\nt.add(Pokemon('test2'))\nt.add(Pokemon('test3'))\nassert len(t.best_team(3)) == 3\nassert len(t.box) == 0",
+            safe_builtins,
+            sandbox,
+        )
+    except AssertionError:
+        return "Cheating detected"
     except Exception as e:
-        return None
+        return "Class SmartTrainer is lacking functionality"
 
-    return trainer_class
+    return sandbox["SmartTrainer"]
 
 
 def get_upload_path(filename):
