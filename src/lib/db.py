@@ -1,98 +1,100 @@
-import json
 import os
+import sqlite3
 
+from flask import g
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from lib.config import DATABASE_FILE
+from lib.config import DATABASE_FILE, UPLOAD_FOLDER
 
 
-def _load():
-    if not os.path.exists(DATABASE_FILE):
-        return {"users": dict()}
-
-    with open(DATABASE_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def _save(data):
-    with open(DATABASE_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+def _get_db():
+    db = getattr(g, "_database", None)
+    if db is None:
+        print("rofls")
+        db = g._database = sqlite3.connect(DATABASE_FILE)
+    return db
 
 
 def create_user(username: str, password: str):
-    db = _load()
-    if username in db["users"].keys():
-        return False
+    cur = _get_db().cursor()
+    cur.execute("SELECT id FROM users WHERE username = ?", (username,))
 
-    db["users"][username] = {
-        "password": generate_password_hash(password),
-        "won": [],
-        "lost": [],
-        "is_admin": False,
-        "has_uploaded_trainer": False,
-    }
-    _save(db)
-    return True
+    if len(cur.fetchall()) != 0:
+        cur.close()
+        return -1
+
+    cur.execute(
+        "INSERT INTO users (username, password) VALUES (?, ?)",
+        (username, generate_password_hash(password)),
+    )
+
+    _get_db().commit()
+
+    cur.execute("SELECT id FROM users WHERE username = ?", (username,))
+    user_id = cur.fetchall()[0][0]
+    cur.close()
+
+    return user_id
 
 
 def check_password(username: str, password: str):
-    db = _load()
+    cur = _get_db().cursor()
+    cur.execute("SELECT id, password FROM users WHERE username = ?", (username,))
+    data = cur.fetchall()
+    cur.close()
 
-    if username not in db["users"].keys():
+    if len(data) == 0 or not check_password_hash(data[0][1], password):
+        return -1
+
+    return data[0][0]
+
+
+def get_id_by_username(username: str):
+    cur = _get_db().cursor()
+    cur.execute("SELECT id FROM users WHERE username = ?", (username,))
+    id_data = cur.fetchall()
+    cur.close()
+
+    if len(id_data) == 0:
         return False
 
-    return check_password_hash(db["users"][username]["password"], password)
+    return id_data[0][0]
+
+
+def get_username_by_id(id: str):
+    cur = _get_db().cursor()
+    cur.execute("SELECT username FROM users WHERE id = ?", (id,))
+    username_data = cur.fetchall()
+    cur.close()
+
+    if len(username_data) == 0:
+        return False
+
+    return username_data[0][0]
 
 
 def get_all_active_users():
-    db = _load()
+    cur = _get_db().cursor()
+    cur.execute("SELECT id, username FROM users")
+    users = cur.fetchall()
+    cur.close()
 
-    return dict(
-        (username, data)
-        for username, data in db["users"].items()
-        if data["has_uploaded_trainer"]
-    )
+    active_users = dict()
+
+    for id, username in users:
+        if os.path.exists(os.path.join(UPLOAD_FOLDER, f"{id}.py")):
+            active_users[username] = []
+
+    return active_users
 
 
-def get_admin_status(username: str):
-    db = _load()
+def get_admin_status(id: str):
+    cur = _get_db().cursor()
+    cur.execute("SELECT is_admin FROM users WHERE id = ?", (id,))
+    admin_data = cur.fetchall()
+    cur.close()
 
-    if username not in db["users"].keys():
+    if len(admin_data) == 0 or admin_data[0][0] == 0:
         return False
 
-    return db["users"][username]["is_admin"]
-
-
-def update_trainer_status(username: str):
-    db = _load()
-
-    if username not in db["users"].keys():
-        return False
-
-    db["users"][username]["has_uploaded_trainer"] = True
-    _save(db)
-    return True
-
-
-def add_won(username: str, id: int):
-    db = _load()
-
-    if username not in db["users"].keys():
-        return False
-
-    db["users"][username]["won"].append(id)
-
-    _save(db)
-    return True
-
-
-def add_lost(username: str, id: int):
-    db = _load()
-
-    if username not in db["users"].keys():
-        return False
-
-    db["users"][username]["lost"].append(id)
-
-    _save(db)
     return True

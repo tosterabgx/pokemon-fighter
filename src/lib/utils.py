@@ -20,7 +20,7 @@ def get_upload_path(filename):
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if not session.get("user"):
+        if not session.get("user_id"):
             return redirect(url_for("login"))
         return f(*args, **kwargs)
 
@@ -30,7 +30,7 @@ def login_required(f):
 def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if not get_admin_status(session.get("user", "")):
+        if not get_admin_status(session.get("user_id", "")):
             return redirect(url_for("profile"))
 
         return f(*args, **kwargs)

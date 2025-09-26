@@ -72,18 +72,6 @@ class Pokemon:
         """Get the Pokemon's name."""
         return self.name
 
-    def get_hp(self) -> int:
-        """Get the Pokemon's hit points."""
-        return self.hp
-
-    def get_atk(self) -> int:
-        """Get the Pokemon's attack power."""
-        return self.atk
-
-    def get_def(self) -> int:
-        """Get the Pokemon's defense power."""
-        return self.df
-
     def attack(self, opponent: "Pokemon") -> None:
         """Attack the other pokemon, reducing their HP.
 

@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, render_template, session
+from flask import Flask, g, render_template, session
 
 from api import api_blueprint
 from lib.db import get_admin_status, get_all_active_users
@@ -33,9 +33,18 @@ def register():
 @app.get("/profile/")
 @login_required
 def profile():
-    return render_template("profile.html", is_admin=get_admin_status(session["user"]))
+    return render_template(
+        "profile.html", is_admin=get_admin_status(session["user_id"])
+    )
 
 
 @app.route("/table/")
 def table():
-    return render_template("table.html", users=get_all_active_users().items())
+    return render_template("table.html", users=sorted(get_all_active_users().items()))
+
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, "_database", None)
+    if db is not None:
+        db.close()
