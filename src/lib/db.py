@@ -54,11 +54,11 @@ def get_all_active_users():
     users = cur.fetchall()
     cur.close()
 
-    active_users = dict()
+    active_users = list()
 
     for id, username in users:
         if os.path.exists(os.path.join(UPLOAD_FOLDER, f"{id}.py")):
-            active_users[username] = []
+            active_users.append((id, username))
 
     return active_users
 

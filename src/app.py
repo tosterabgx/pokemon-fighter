@@ -42,7 +42,7 @@ def profile():
 
 @app.route("/table/")
 def table():
-    return render_template("table.html", users=sorted(get_all_active_users().items()))
+    return render_template("table.html", users=get_all_active_users())
 
 
 @app.teardown_appcontext

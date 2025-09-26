@@ -84,5 +84,5 @@ class Battle:
             return 1
 
 
-def do_battle_all():
+def do_battle_all(trainers):
     return (dict(), dict())

@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, redirect, request, session, url_for
 
 from lib.battle import do_battle_all
-from lib.db import check_password, create_user
+from lib.db import check_password, create_user, get_all_active_users
 from lib.utils import admin_required, get_upload_path, login_required, validate_trainer
 
 api_blueprint = Blueprint("api", __name__)
@@ -72,19 +72,16 @@ def upload():
 @api_blueprint.post("/api/battle_all")
 @admin_required
 def battle_all():
-    try:
-        usernames, results = do_battle_all()
+    usernames, results = do_battle_all(get_all_active_users())
 
-        if usernames:
-            summary = ", ".join(
-                f"{u}: {len(results[u]['won'])}W/{len(results[u]['lost'])}L"
-                for u in sorted(usernames)
-            )
-        else:
-            summary = "no trainers found"
+    if usernames:
+        summary = ", ".join(
+            f"{u}: {len(results[u]['won'])}W/{len(results[u]['lost'])}L"
+            for u in sorted(usernames)
+        )
+    else:
+        summary = "no trainers found"
 
-        flash(f"Tournament complete: {summary}")
-    except Exception as e:
-        flash(f"Compete-all failed: {e}")
+    flash(f"Tournament complete: {summary}")
 
     return redirect(url_for("profile"))

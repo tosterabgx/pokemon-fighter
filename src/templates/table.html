@@ -12,19 +12,19 @@
   <thead>
     <tr>
       <th scope="col">Username</th>
-      {% for username, data in users %}
+      {% for id, username in users %}
       <th scope="col">{{ username }}</th>
       {% endfor %}
     </tr>
   </thead>
   <tbody>
-    {% for username, data in users %}
+    {% for id, username in users %}
     <tr>
       <th scope="row">{{ username }}</th>
       {% for i in range(users|length) %}
-      {% if i in data['won'] %}
+      {% if 1 == 1 %}
       <td>+</td>
-      {% elif i in data['lost'] %}
+      {% elif 1 == 1 %}
       <td>-</td>
       {% else %}
       <td></td>
