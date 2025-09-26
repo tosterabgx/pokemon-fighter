@@ -3,22 +3,26 @@
 {% block title %}Profile{% endblock %}
 
 {% block content %}
-<form method="post" action="/api/upload" enctype="multipart/form-data">
+<form method="post" action="{{ url_for('api.upload') }}" enctype="multipart/form-data">
   <input type="file" name="file" accept=".py" required>
   <button type="submit">Upload</button>
 </form>
+
+{% if is_admin %}
+<br>
+ADMIN SECTION
+
+<form method="post" action="{{ url_for('api.battle_all') }}">
+  <button type="submit">Battle all trainers!</button>
+</form>
+{% endif %}
 
 {% for message in get_flashed_messages() %}
 <p style="color: red;">{{ message }}</p>
 {% endfor %}
 
-{% if is_admin %}
-<form method="post" action="/api/compete_all">
-  <button type="submit">Compete all trainers!</button>
-</form>
-{% endif %}
-
+<br>
 <a href="{{ url_for('index') }}">Main page</a><br>
-<a href="{{ url_for('index') }}">Table</a><br>
+<a href="{{ url_for('table') }}">Table</a><br>
 <a href="{{ url_for('api.logout') }}">Logout</a><br>
 {% endblock %}

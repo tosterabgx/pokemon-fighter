@@ -68,10 +68,6 @@ class Pokemon:
     def df(self, value: int) -> None:
         self._df = max(0, value)
 
-    def get_name(self) -> str:
-        """Get the Pokemon's name."""
-        return self.name
-
     def attack(self, opponent: "Pokemon") -> None:
         """Attack the other pokemon, reducing their HP.
 
@@ -193,3 +189,11 @@ class Trainer:
         n = min(n, len(self.box))
         team, self.box = self.box[:n], self.box[n:]
         return team
+
+    def receive_opponent_id(self, opponent_id: int) -> None:
+        pass
+
+    def receive_battle_info(
+        self, opponent_id: int, pokemons: list[Pokemon], result: bool
+    ) -> None:
+        pass

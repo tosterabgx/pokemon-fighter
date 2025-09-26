@@ -9,6 +9,16 @@ from lib.config import EXEC_BLACKLIST, UPLOAD_FOLDER
 from lib.db import get_admin_status
 
 
+def get_trainer(id):
+    sandbox = {"Trainer": Trainer, "Pokemon": Pokemon}
+    with open(get_upload_path(f"{id}.py")) as f:
+        code = f.read()
+
+    exec(code, locals=sandbox)
+
+    return sandbox["SmartTrainer"]
+
+
 def validate_trainer(code) -> str | Trainer:
     try:
         code_string = str(code)
@@ -35,7 +45,7 @@ def validate_trainer(code) -> str | Trainer:
 
     try:
         exec(
-            "t = SmartTrainer()\nt.add(Pokemon('test1'))\nt.add(Pokemon('test2'))\nt.add(Pokemon('test3'))\nassert len(t.best_team(3)) == 3\nassert len(t.box) == 0",
+            "t = SmartTrainer()\nt.add(Pokemon('test1'))\nt.box = []\nt.add(Pokemon('test2'))\nt.add(Pokemon('test3'))\nassert len(t.best_team(2)) == 2\nassert len(t.box) == 0",
             safe_builtins,
             sandbox,
         )
@@ -70,4 +80,5 @@ def admin_required(f):
 
         return f(*args, **kwargs)
 
+    return wrapper
     return wrapper

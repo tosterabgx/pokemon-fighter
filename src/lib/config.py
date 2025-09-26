@@ -15,4 +15,5 @@ EXEC_BLACKLIST = {
     "exit",
     "__import__",
     "import",
+    "print",
 }

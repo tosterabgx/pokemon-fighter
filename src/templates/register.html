@@ -3,7 +3,7 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<form method="post" action="/api/register">
+<form method="post" action="{{ url_for('api.register') }}">
   <label for="username">Username</label>
   <input name="username" id="username" required>
   <label for="password">Password</label>
