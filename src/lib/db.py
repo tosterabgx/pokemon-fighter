@@ -12,6 +12,7 @@ database_object = None
 
 def _get_db():
     global database_object
+
     db = database_object
     if db is None:
         db = database_object = sqlite3.connect(DATABASE_FILE, check_same_thread=False)
@@ -89,87 +90,86 @@ def get_username_by_id(id: int):
     return data[0][0]
 
 
-def get_competition_result(userId: int) -> tuple[dict, dict]:
+def get_competition_result(userId: int) -> dict:
     cur = _get_db().cursor()
-    cur.execute("SELECT win, lose FROM results WHERE userId = ?", (userId,))
+    cur.execute("SELECT scores FROM results WHERE userId = ?", (userId,))
     data = cur.fetchall()
     cur.close()
 
     if len(data) == 0:
-        return dict(), dict()
-
-    win, lose = map(str, data[0])
+        return dict()
 
     try:
-        win = loads(win)
+        scores = loads(data[0][0])
+        scores = dict(zip(map(int, scores.keys()), scores.values()))
     except:
-        win = dict()
+        scores = dict()
 
-    try:
-        lose = loads(lose)
-    except:
-        lose = dict()
-
-    return win, lose
+    return scores
 
 
 def get_all_results_with_usernames():
-    cur = _get_db().cursor()
-    cur.execute(
-        "SELECT userId FROM results ORDER BY LENGTH (win) DESC, LENGTH (lose) ASC"
-    )
-    data = cur.fetchall()
-    cur.close()
+    try:
+        cur = _get_db().cursor()
+        cur.execute("SELECT userId FROM results")
+        data = cur.fetchall()
+        cur.close()
 
-    results = dict()
-    usernames = dict()
+        results = dict()
+        usernames = dict()
 
-    for userId in data:
-        userId = userId[0]
+        for userId in data:
+            userId = userId[0]
 
-        u = get_username_by_id(userId)
+            u = get_username_by_id(userId)
 
-        if u:
-            results[userId] = get_competition_result(userId)
-            usernames[userId] = u
+            if u:
+                res = get_competition_result(userId)
 
-    return results, usernames
+                wins = dict(filter(lambda y: y[1][0] > y[1][1], res.items()))
+                loses = dict(filter(lambda y: y[1][0] < y[1][1], res.items()))
+                draws = dict(filter(lambda y: y[1][0] == y[1][1], res.items()))
+
+                results[userId] = (wins, loses, draws)
+                usernames[userId] = u
+
+        results = sorted(results.items(), key=lambda x: (-len(x[1][0]), len(x[1][1])))
+
+        return results, usernames
+    except:
+        return get_all_results_with_usernames()
 
 
 def add_competition_result(userId: int, otherId: int, score: tuple):
-    cur = _get_db().cursor()
-    cur.execute("SELECT id FROM results WHERE userId = ?", (userId,))
+    try:
+        cur = _get_db().cursor()
+        cur.execute("SELECT id FROM results WHERE userId = ?", (userId,))
 
-    wins, loses = get_competition_result(userId)
+        scores = get_competition_result(userId)
+        scores[otherId] = score
+        scores_data = dumps(scores)
 
-    if score[0] > score[1]:
-        wins[otherId] = score
+        if len(cur.fetchall()) == 0:
+            cur.execute(
+                "INSERT INTO results (userId, scores) VALUES (?, ?)",
+                (userId, scores_data),
+            )
+        else:
+            cur.execute(
+                "UPDATE results SET scores = ? WHERE userId = ?",
+                (scores_data, userId),
+            )
 
-    if score[0] < score[1]:
-        loses[otherId] = score
-
-    win_data = dumps(wins)
-    lose_data = dumps(loses)
-
-    if len(cur.fetchall()) == 0:
-        cur.execute(
-            "INSERT INTO results (userId, win, lose) VALUES (?, ?, ?)",
-            (userId, win_data, lose_data),
-        )
-    else:
-        cur.execute(
-            "UPDATE results SET win = ?, lose = ? WHERE userId = ?",
-            (win_data, lose_data, userId),
-        )
-
-    _get_db().commit()
-    cur.close()
+        _get_db().commit()
+        cur.close()
+    except:
+        add_competition_result(userId, otherId, score)
 
 
 def reset_results():
     cur = _get_db().cursor()
 
-    cur.execute("UPDATE results SET win = '', lose = ''")
+    cur.execute("UPDATE results SET scores = ''")
 
     _get_db().commit()
     cur.close()

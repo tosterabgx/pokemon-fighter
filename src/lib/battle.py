@@ -1,8 +1,9 @@
 import random
+import sqlite3
 from copy import deepcopy
 
 from lib.base import ElectricPokemon, FirePokemon, GrassPokemon, Pokemon, WaterPokemon
-from lib.config import NUMBER_OF_ROUNDS
+from lib.config import DATABASE_FILE, NUMBER_OF_ROUNDS
 from lib.db import add_competition_result
 from lib.utils import get_trainer
 
@@ -97,7 +98,7 @@ def do_battle_all(users):
 
             score = [0, 0]
 
-            for _ in range(NUMBER_OF_ROUNDS // 2):
+            for round_number in range(NUMBER_OF_ROUNDS // 2):
                 battle = Battle()
                 battle.fill_box()
 
@@ -111,12 +112,16 @@ def do_battle_all(users):
                 else:
                     score[0] += 1
 
+                if round_number % 468 == 0:
+                    add_competition_result(ii, ij, tuple(score))
+                    add_competition_result(ij, ii, tuple(score[::-1]))
+
             add_competition_result(ii, ij, tuple(score))
             add_competition_result(ij, ii, tuple(score[::-1]))
 
             if score[0] > score[1]:
                 results[ii]["win"].append(ij)
-                results[ij]["lose"].append(ii)
+                results[ij]["lose"].append(ii)1
             elif score[1] > score[0]:
                 results[ij]["win"].append(ii)
                 results[ii]["lose"].append(ij)

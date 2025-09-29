@@ -1,7 +1,7 @@
 import os
 import threading
 
-from flask import Blueprint, current_app, flash, redirect, request, session, url_for
+from flask import Blueprint, flash, redirect, request, session, url_for
 
 from lib.battle import do_battle_all
 from lib.config import DATABASE_FILE
@@ -86,7 +86,6 @@ def battle_all():
     threading.Thread(target=_runner).start()
 
     flash("Started battle! Look at the table")
-
     return redirect(url_for("profile"))
 
 

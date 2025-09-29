@@ -8,28 +8,28 @@
     <thead class="bg-gray-100">
       <tr>
         <th class="border border-gray-300 px-4 py-2">Username</th>
-        {% for u in usernames.values() %}
-        <td class="border border-gray-300 px-4 py-2">{{ u }}</td>
+        {% for id, _ in results %}
+        <td class="border border-gray-300 px-4 py-2">{{ usernames[id] }}</td>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for id, u in usernames.items() %}
+      {% for id, _ in results %}
       <tr>
-        <th class="border border-gray-300 px-4 py-2 font-medium bg-gray-100">{{ u }}</th>
-        {% for oid, r in results.items() %}
-        {% if id|string in r[1].keys() %}
+        <th class="border border-gray-300 px-4 py-2 font-medium bg-gray-100">{{ usernames[id] }}</th>
+        {% for other_id, other_r in results %}
+        {% if id in other_r[1].keys() %}
         <td class="border border-gray-300 px-4 py-2 bg-green-300">
-          {{ r[1][id|string][::-1] }}
+          {{ other_r[1][id][::-1] }}
         </td>
-        {% elif id|string in r[0].keys() %}
+        {% elif id in other_r[0].keys() %}
         <td class="border border-gray-300 px-4 py-2 bg-red-300">
-          {{ r[0][id|string][::-1] }}
+          {{ other_r[0][id][::-1] }}
         </td>
-        {% elif oid == id %}
-        <td class="border border-gray-300 px-4 py-2 bg-gray-50">–</td>
+        {% elif id in other_r[2].keys() %}
+        <td class="border border-gray-300 px-4 py-2 bg-gray-50">{{ other_r[2][id][::-1] }}</td>
         {% else %}
-        <td class="border border-gray-300 px-4 py-2 bg-gray-50"> {{ default_value }} </td>
+        <td class="border border-gray-300 px-4 py-2 bg-gray-50">-</td>
         {% endif %}
         {% endfor %}
       </tr>
@@ -48,6 +48,6 @@
         }
       })
       .catch(error => console.error("Error checking for updates:", error));
-  }, 2000);
+  }, 1000);
 </script>
 {% endblock %}

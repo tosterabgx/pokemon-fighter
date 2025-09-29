@@ -1,0 +1,1 @@
+class SmartTrainer(Trainer): pass
