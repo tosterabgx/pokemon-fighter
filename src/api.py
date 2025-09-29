@@ -1,10 +1,15 @@
+import os
+
 from flask import Blueprint, flash, redirect, request, session, url_for
 
 from lib.battle import do_battle_all
+from lib.config import DATABASE_FILE
 from lib.db import check_password, create_user, get_all_active_users
 from lib.utils import admin_required, get_upload_path, login_required, validate_trainer
 
 api_blueprint = Blueprint("api", __name__)
+
+last_modified = os.path.getmtime(DATABASE_FILE)
 
 
 @api_blueprint.post("/api/login")
@@ -76,3 +81,14 @@ def battle_all():
     flash(f"Tournament complete!{' No trainers found' if len(results) == 0 else ''}")
 
     return redirect(url_for("profile"))
+
+
+@api_blueprint.get("/api/check_update")
+def check_update():
+    global last_modified
+    current_modified = os.path.getmtime(DATABASE_FILE)
+    if current_modified != last_modified:
+        last_modified = current_modified
+        return {"update": True}
+
+    return {"update": False}

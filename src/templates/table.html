@@ -31,4 +31,17 @@
     </tbody>
   </table>
 </div>
+
+<script>
+  setInterval(() => {
+    fetch("/api/check_update")
+      .then(response => response.json())
+      .then(data => {
+        if (data.update) {
+          location.reload();
+        }
+      })
+      .catch(error => console.error("Error checking for updates:", error));
+  }, 3000);
+</script>
 {% endblock %}

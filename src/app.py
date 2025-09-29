@@ -13,7 +13,9 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("secret_key")
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024
+
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.jinja_env.auto_reload = True
 
 app.register_blueprint(api_blueprint)
 
