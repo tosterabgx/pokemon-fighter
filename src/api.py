@@ -71,16 +71,8 @@ def upload():
 @api_blueprint.post("/api/battle_all")
 @admin_required
 def battle_all():
-    usernames, results = do_battle_all(get_all_active_users())
+    results = do_battle_all(get_all_active_users())
 
-    if usernames:
-        summary = ", ".join(
-            f"{u}: {len(results[u]['won'])}W/{len(results[u]['lost'])}L"
-            for u in sorted(usernames)
-        )
-    else:
-        summary = "no trainers found"
-
-    flash(f"Tournament complete: {summary}")
+    flash(f"Tournament complete!{' No trainers found' if len(results) == 0 else ''}")
 
     return redirect(url_for("profile"))

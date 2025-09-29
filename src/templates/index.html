@@ -3,8 +3,9 @@
 {% block title %}Pokemon Fighter{% endblock %}
 
 {% block content %}
-<h1>
-  <pre>
+<div class="mt-20 flex flex-col items-center gap-5">
+  <pre class="flex justify-center rounded-lg bg-gray-100 min-w-1/2 px-7 text-xl/5 shadow-md">
+
                                   ,'\
     _.----.        ____         ,'  _\   ___    ___     ____
 _,-'       `.     |    |  /`.   \,-'    |   \  /   |   |    \  |`.
@@ -17,9 +18,14 @@ _,-'       `.     |    |  /`.   \,-'    |   \  /   |   |    \  |`.
        \    \ `.__,'|  |`-._    `|      |__| \/ |  `.__,'|  | |   |
         \_.-'       |__|    `-._ |              '-.|     '-.| |   |
                                 `'                            '-._|
-    </pre>
-</h1>
+  </pre>
 
-<a href="{{ url_for('profile') }}">Profile</a><br>
-<a href="{{ url_for('table') }}">Table</a>
-{% endblock %}Main page
+  <div class="grid min-w-1/4 grid-cols-2 gap-5">
+    <a class="rounded-lg bg-gray-100 py-2 px-7 text-center text-lg shadow-md transition duration-100 ease-in-out hover:bg-blue-300"
+      href="{{ url_for('table') }}">Table</a>
+    <a class="rounded-lg bg-gray-100 py-2 px-7 text-center text-lg shadow-md transition duration-100 ease-in-out hover:bg-blue-300"
+      href="{{ url_for('profile') }}">Profile</a>
+
+  </div>
+</div>
+{% endblock %}

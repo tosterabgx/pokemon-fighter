@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, g, render_template, session
 
 from api import api_blueprint
-from lib.db import get_admin_status, get_all_active_users
+from lib.db import get_admin_status, get_all_results_with_usernames
 from lib.utils import login_required
 
 load_dotenv()
@@ -43,10 +43,9 @@ def profile():
 
 @app.route("/table/")
 def table():
-    with open("results.json") as f:
-        results = load(f)
+    results, usernames = get_all_results_with_usernames()
 
-    return render_template("table.html", users=results.keys(), results=results)
+    return render_template("table.html", usernames=usernames, results=results)
 
 
 @app.teardown_appcontext

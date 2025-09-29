@@ -1,14 +1,8 @@
 import random
-from json import dump
+from copy import deepcopy
 
-from lib.base import (
-    ElectricPokemon,
-    FirePokemon,
-    GrassPokemon,
-    Pokemon,
-    Trainer,
-    WaterPokemon,
-)
+from lib.base import ElectricPokemon, FirePokemon, GrassPokemon, Pokemon, WaterPokemon
+from lib.db import add_competition_result
 from lib.utils import get_trainer
 
 POKEMON_TYPES = [ElectricPokemon, FirePokemon, GrassPokemon, WaterPokemon]
@@ -55,8 +49,8 @@ class Battle:
         if len(self.box) < pokemon_per_team:
             raise IndexError("Boxes are not filled enough. Have you used fill_box?")
 
-        trainer1.box = self.box
-        trainer2.box = self.box
+        trainer1.box = deepcopy(self.box)
+        trainer2.box = deepcopy(self.box)
 
         team1 = trainer1.best_team(pokemon_per_team)
         team2 = trainer2.best_team(pokemon_per_team)
@@ -90,15 +84,14 @@ class Battle:
 
 def do_battle_all(users):
     n = len(users)
-    usernames = [u for _, u in users]
 
-    trainers = [get_trainer(id) for id, _ in users]
+    trainers = [get_trainer(id) for id in users]
 
-    results = {u: {"won": [], "lost": []} for u in usernames}
+    results = {id: {"win": [], "lose": []} for id in users}
     for i in range(n):
-        ui, ti = usernames[i], trainers[i]
+        ii, ti = users[i], trainers[i]
         for j in range(i + 1, n):
-            uj, tj = usernames[j], trainers[j]
+            ij, tj = users[j], trainers[j]
 
             r = 0
 
@@ -109,13 +102,16 @@ def do_battle_all(users):
                 r += battle.start(ti, tj) - battle.start(tj, ti)
 
             if r < 0:
-                results[ui]["won"].append(j)
-                results[uj]["lost"].append(i)
+                add_competition_result(ii, win=ij)
+                results[ii]["win"].append(ij)
+
+                add_competition_result(ij, lose=ii)
+                results[ij]["lose"].append(ii)
             elif r > 0:
-                results[uj]["won"].append(i)
-                results[ui]["lost"].append(j)
+                add_competition_result(ij, win=ii)
+                results[ij]["win"].append(ii)
 
-    with open("results.json", mode="w") as f:
-        dump(results, fp=f, indent=2)
+                add_competition_result(ii, lose=ij)
+                results[ii]["lose"].append(ij)
 
-    return usernames, results
+    return results

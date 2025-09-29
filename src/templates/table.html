@@ -1,39 +1,34 @@
 {% extends "base.html" %}
 
-{% block styles %}
-
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-{% endblock %}
-
 {% block title %}Table{% endblock %}
 
 {% block content %}
-<table class="w-1/2 mx-1/2">
-  <thead class>
-    <tr>
-      <th scope="col" class="px-6 py-3 bg-gray-400">Username</th>
-      {% for username in users %}
-      <th scope="col" class="px-6 py-3 border-l border-gray-700 bg-gray-400">
-        {{ username }}
-      </th>
+<div class="rounded-lg bg-gray-100 p-2 m-10 shadow-md">
+  <table class="w-full border border-gray-300 text-center bg-white">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="border border-gray-300 px-4 py-2">Username</th>
+        {% for u in usernames.values() %}
+        <td class="border border-gray-300 px-4 py-2">{{ u }}</td>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for id, u in usernames.items() %}
+      <tr>
+        <th class="border border-gray-300 px-4 py-2 font-medium bg-gray-100">{{ u }}</th>
+        {% for r in results.values() %}
+        {% if id in r[1] %}
+        <td class="border border-gray-300 px-4 py-2 bg-green-300"></td>
+        {% elif id in r[0] %}
+        <td class="border border-gray-300 px-4 py-2 bg-red-300"></td>
+        {% else %}
+        <td class="border border-gray-300 px-4 py-2 bg-gray-50">–</td>
+        {% endif %}
+        {% endfor %}
+      </tr>
       {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for username in users %}
-    <tr class="border-t border-gray-700">
-      <th scope="row" class="px-6 py-3 bg-gray-400">{{ username }}</th>
-      {% for i in range(users|length) %}
-      {% if i in results[username]["won"] %}
-      <td class="px-6 py-3 border-l border-gray-700 bg-green-300"></td>
-      {% elif i in results[username]["lost"] %}
-      <td class="px-6 py-3 border-l border-gray-700 bg-red-300"></td>
-      {% else %}
-      <td class="px-6 py-3 border-l border-gray-700 bg-gray-300"></td>
-      {% endif %}
-      {% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    </tbody>
+  </table>
+</div>
 {% endblock %}
