@@ -17,13 +17,19 @@
       {% for id, u in usernames.items() %}
       <tr>
         <th class="border border-gray-300 px-4 py-2 font-medium bg-gray-100">{{ u }}</th>
-        {% for r in results.values() %}
-        {% if id in r[1] %}
-        <td class="border border-gray-300 px-4 py-2 bg-green-300"></td>
-        {% elif id in r[0] %}
-        <td class="border border-gray-300 px-4 py-2 bg-red-300"></td>
-        {% else %}
+        {% for oid, r in results.items() %}
+        {% if id|string in r[1].keys() %}
+        <td class="border border-gray-300 px-4 py-2 bg-green-300">
+          {{ r[1][id|string][::-1] }}
+        </td>
+        {% elif id|string in r[0].keys() %}
+        <td class="border border-gray-300 px-4 py-2 bg-red-300">
+          {{ r[0][id|string][::-1] }}
+        </td>
+        {% elif oid == id %}
         <td class="border border-gray-300 px-4 py-2 bg-gray-50">–</td>
+        {% else %}
+        <td class="border border-gray-300 px-4 py-2 bg-gray-50"> {{ default_value }} </td>
         {% endif %}
         {% endfor %}
       </tr>
@@ -42,6 +48,6 @@
         }
       })
       .catch(error => console.error("Error checking for updates:", error));
-  }, 3000);
+  }, 2000);
 </script>
 {% endblock %}

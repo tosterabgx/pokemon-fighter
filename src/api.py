@@ -1,10 +1,11 @@
 import os
+import threading
 
-from flask import Blueprint, flash, redirect, request, session, url_for
+from flask import Blueprint, current_app, flash, redirect, request, session, url_for
 
 from lib.battle import do_battle_all
 from lib.config import DATABASE_FILE
-from lib.db import check_password, create_user, get_all_active_users
+from lib.db import check_password, create_user, get_all_active_users, reset_results
 from lib.utils import admin_required, get_upload_path, login_required, validate_trainer
 
 api_blueprint = Blueprint("api", __name__)
@@ -76,9 +77,15 @@ def upload():
 @api_blueprint.post("/api/battle_all")
 @admin_required
 def battle_all():
-    results = do_battle_all(get_all_active_users())
+    reset_results()
+    active_users = get_all_active_users()
 
-    flash(f"Tournament complete!{' No trainers found' if len(results) == 0 else ''}")
+    def _runner():
+        do_battle_all(active_users)
+
+    threading.Thread(target=_runner).start()
+
+    flash("Started battle! Look at the table")
 
     return redirect(url_for("profile"))
 

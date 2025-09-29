@@ -1,10 +1,10 @@
 import os
-from json import load
 
 from dotenv import load_dotenv
-from flask import Flask, g, render_template, session
+from flask import Flask, render_template, session
 
 from api import api_blueprint
+from lib.config import NUMBER_OF_ROUNDS
 from lib.db import get_admin_status, get_all_results_with_usernames
 from lib.utils import login_required
 
@@ -47,11 +47,9 @@ def profile():
 def table():
     results, usernames = get_all_results_with_usernames()
 
-    return render_template("table.html", usernames=usernames, results=results)
-
-
-@app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, "_database", None)
-    if db is not None:
-        db.close()
+    return render_template(
+        "table.html",
+        usernames=usernames,
+        results=results,
+        default_value=[NUMBER_OF_ROUNDS] * 2,
+    )

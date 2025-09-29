@@ -2,6 +2,7 @@ import random
 from copy import deepcopy
 
 from lib.base import ElectricPokemon, FirePokemon, GrassPokemon, Pokemon, WaterPokemon
+from lib.config import NUMBER_OF_ROUNDS
 from lib.db import add_competition_result
 from lib.utils import get_trainer
 
@@ -77,12 +78,13 @@ class Battle:
                 pokemon1 = team1[i]
 
         if j >= len(team2):
-            return -1
+            return WIN_FIRST
         else:
-            return 1
+            return WIN_SECOND
 
 
 def do_battle_all(users):
+    print("STARTED BATTLE")
     n = len(users)
 
     trainers = [get_trainer(id) for id in users]
@@ -93,25 +95,31 @@ def do_battle_all(users):
         for j in range(i + 1, n):
             ij, tj = users[j], trainers[j]
 
-            r = 0
+            score = [0, 0]
 
-            for _ in range(100):
+            for _ in range(NUMBER_OF_ROUNDS // 2):
                 battle = Battle()
                 battle.fill_box()
 
-                r += battle.start(ti, tj) - battle.start(tj, ti)
+                if battle.start(ti, tj) == WIN_FIRST:
+                    score[0] += 1
+                else:
+                    score[1] += 1
 
-            if r < 0:
-                add_competition_result(ii, win=ij)
+                if battle.start(tj, ti) == WIN_FIRST:
+                    score[1] += 1
+                else:
+                    score[0] += 1
+
+            add_competition_result(ii, ij, tuple(score))
+            add_competition_result(ij, ii, tuple(score[::-1]))
+
+            if score[0] > score[1]:
                 results[ii]["win"].append(ij)
-
-                add_competition_result(ij, lose=ii)
                 results[ij]["lose"].append(ii)
-            elif r > 0:
-                add_competition_result(ij, win=ii)
+            elif score[1] > score[0]:
                 results[ij]["win"].append(ii)
-
-                add_competition_result(ii, lose=ij)
                 results[ii]["lose"].append(ij)
 
+    print("FINISHED BATTLE")
     return results

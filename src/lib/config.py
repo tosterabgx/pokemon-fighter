@@ -17,3 +17,5 @@ EXEC_BLACKLIST = {
     "import",
     "print",
 }
+
+NUMBER_OF_ROUNDS = 10_000

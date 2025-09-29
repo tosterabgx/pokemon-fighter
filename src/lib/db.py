@@ -1,16 +1,21 @@
 import os
 import sqlite3
+from json import dumps, loads
 
 from flask import g
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from lib.config import DATABASE_FILE, UPLOAD_FOLDER
 
+database_object = None
+
 
 def _get_db():
-    db = getattr(g, "_database", None)
+    global database_object
+    db = database_object
     if db is None:
-        db = g._database = sqlite3.connect(DATABASE_FILE)
+        db = database_object = sqlite3.connect(DATABASE_FILE, check_same_thread=False)
+
     return db
 
 
@@ -84,26 +89,26 @@ def get_username_by_id(id: int):
     return data[0][0]
 
 
-def get_competition_result(userId: int) -> tuple[tuple, tuple]:
+def get_competition_result(userId: int) -> tuple[dict, dict]:
     cur = _get_db().cursor()
     cur.execute("SELECT win, lose FROM results WHERE userId = ?", (userId,))
     data = cur.fetchall()
     cur.close()
 
     if len(data) == 0:
-        return tuple(), tuple()
+        return dict(), dict()
 
     win, lose = map(str, data[0])
 
-    if win is not None and win != "":
-        win = tuple(map(int, win.split(";")))
-    else:
-        win = tuple()
+    try:
+        win = loads(win)
+    except:
+        win = dict()
 
-    if lose is not None and lose != "":
-        lose = tuple(map(int, lose.split(";")))
-    else:
-        lose = tuple()
+    try:
+        lose = loads(lose)
+    except:
+        lose = dict()
 
     return win, lose
 
@@ -131,22 +136,20 @@ def get_all_results_with_usernames():
     return results, usernames
 
 
-def add_competition_result(
-    userId: int, win: int | None = None, lose: int | None = None
-):
+def add_competition_result(userId: int, otherId: int, score: tuple):
     cur = _get_db().cursor()
     cur.execute("SELECT id FROM results WHERE userId = ?", (userId,))
 
-    win_list, lose_list = map(list, get_competition_result(userId))
+    wins, loses = get_competition_result(userId)
 
-    if win is not None:
-        win_list.append(win)
+    if score[0] > score[1]:
+        wins[otherId] = score
 
-    if lose is not None:
-        lose_list.append(lose)
+    if score[0] < score[1]:
+        loses[otherId] = score
 
-    win_data = ";".join(map(str, win_list))
-    lose_data = ";".join(map(str, lose_list))
+    win_data = dumps(wins)
+    lose_data = dumps(loses)
 
     if len(cur.fetchall()) == 0:
         cur.execute(
@@ -158,6 +161,15 @@ def add_competition_result(
             "UPDATE results SET win = ?, lose = ? WHERE userId = ?",
             (win_data, lose_data, userId),
         )
+
+    _get_db().commit()
+    cur.close()
+
+
+def reset_results():
+    cur = _get_db().cursor()
+
+    cur.execute("UPDATE results SET win = '', lose = ''")
 
     _get_db().commit()
     cur.close()
