@@ -1,6 +1,5 @@
 # Pokemon Fighter
 
-Small website written for 
+Small website written as a school project
 
-
-...something is coming here soon...
+# CANCELED
